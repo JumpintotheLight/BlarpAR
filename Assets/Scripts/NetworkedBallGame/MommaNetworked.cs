@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class MommaNetworked : NetworkBehaviour
+public class MommaNetworked : MonoBehaviour
 {
     public GameObject Score;
 
@@ -39,9 +39,15 @@ public class MommaNetworked : NetworkBehaviour
 
     void OnCollisionEnter(Collision c)
     {
-        if (isServer && c.gameObject.name.Contains("Baby"))
+        /*if (isServer && c.gameObject.name.Contains("Baby"))
         {
             NetworkedBallGame.nBallGame.MommaHit(c.gameObject);
+        }*/
+
+        if (c.gameObject.name.Contains("Baby"))
+        {
+            GameObject.FindObjectOfType<NetworkedBallGame>().MommaHit(c.gameObject);
+            //NetworkedBallGame.nBallGame.MommaHit(c.gameObject);
         }
     }
 }

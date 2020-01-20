@@ -26,31 +26,28 @@ public class NetworkedBallGame : NetworkBehaviour
     //readonly SyncListGO Babies = new SyncListGO(); //List of all babies in scene
     List<GameObject> Babies = new List<GameObject>();
 
-    [SyncVar]
-    public uint menuBabyID; 
-
     public GameObject menuBaby; //The baby instance used for the menu
     public GameObject BabyPrefab; //The balls that the player pulls KEEP As is; set in inspector
-    public GameObject MommaPrefab; //The ball that the player needs to ram the others into KEEP As is; set in inspector
+    //public GameObject MommaPrefab; //The ball that the player needs to ram the others into KEEP As is; set in inspector
     public GameObject HighScorePrefab; //Version of momma ball that displays the highscore KEEP As is; set in inspector
 
-    [SyncVar]
-    public uint mommaID;
+    /*[SyncVar]
+    public uint mommaID;*/
 
     public GameObject Momma; // the current, instantiated momma Momma ball (check if it is destroyed or just teleported) KEEP
     public GameObject ScoreText; // TextMesh of the score for the momma ball
 
-    [SyncVar]
-    public uint startButtonId;
+    /*[SyncVar]
+    public uint startButtonId;*/
 
     public GameObject StartButton; //the instantiated Start button KEEP
-    public GameObject StartButtonPrefab; //Start button prefab, looks like Momma ball KEEP As is; set in inspector
+    //public GameObject StartButtonPrefab; //Start button prefab, looks like Momma ball KEEP As is; set in inspector
 
-    [SyncVar]
-    public uint platformId;
+    /*[SyncVar]
+    public uint platformId;*/
 
     public GameObject Platform; //Main game playform
-    public GameObject PlatformPrefab; //Prefab of game platform
+    //public GameObject PlatformPrefab; //Prefab of game platform
     public Vector3 defaultPlatformVertex; //default vertex value
 
     [SyncVar]
@@ -72,11 +69,11 @@ public class NetworkedBallGame : NetworkBehaviour
     [SyncVar]
     private bool aPlayerLocked = false; //bool to lock in the current active player; set to false when the player releases the trigger button.
 
-    [SyncVar]
-    public uint titleId;
+    /*[SyncVar]
+    public uint titleId;*/
 
     public GameObject Title; //Game title, [instantiated]
-    public GameObject TitlePrefab; //title prefab KEEP
+    //public GameObject TitlePrefab; //title prefab KEEP
 
     //Tutorial fields. Currently disabled
     /*
@@ -102,10 +99,10 @@ public class NetworkedBallGame : NetworkBehaviour
 
 
     //public Shader PlatformShader;
-    [SyncVar]
+    /*[SyncVar]
     public uint roomId;
 
-    public GameObject Room; //GO of game's room
+    public GameObject Room; //GO of game's room*/
     public GameObject roomPrefab; //Prefab of game room
 
     [SyncVar(hook = nameof(UpdateMommaMesh))]
@@ -169,6 +166,7 @@ public class NetworkedBallGame : NetworkBehaviour
             {
                 Debug.Log("nBG Destroyed");
                 GameObject.Destroy(this.gameObject);
+                return;
             }
         }
         nBallGame = this;
@@ -290,7 +288,7 @@ public class NetworkedBallGame : NetworkBehaviour
         //TODO: Call method with stuff that needs to happen only in server
         if (isServer)
         {
-            if (!syncedObejctsSpawned)
+            if (!syncedObjectsSetUp)
             {
                 SetupSyncedObjects();
                 restart(transform.gameObject);
@@ -298,7 +296,7 @@ public class NetworkedBallGame : NetworkBehaviour
         }
         else
         {
-            ClientSetupSyncObjects();
+            ClientSyncObjects();
         }
 
         gameSetUp = true;
@@ -308,13 +306,12 @@ public class NetworkedBallGame : NetworkBehaviour
     [Server]
     private void SetupSyncedObjects()
     {
-        //Spawn and Sync Room
+        //Spawn Room
         GameObject nRoom = (GameObject)Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
+        nRoom.name = "Room";
         NetworkServer.Spawn(nRoom);
-        Room = nRoom;
-        roomId = Room.GetComponent<NetworkIdentity>().netId;
 
-        //Spawn and Sync Platform
+        //SetUp Platform
         GameObject targetCameraRig = GameObject.Find("[CameraRig](Clone)");
         if (targetCameraRig != null)
         {
@@ -324,24 +321,17 @@ public class NetworkedBallGame : NetworkBehaviour
         {
             targetPlayAreaVertex = defaultPlatformVertex;
         }
-
-        GameObject nPlat = (GameObject)Instantiate(PlatformPrefab, new Vector3(0f, -0.49f, 0f), Quaternion.identity);
-        nPlat.transform.localScale = new Vector3(Mathf.Abs(targetPlayAreaVertex.x) * 1.5f, 1.0f, Mathf.Abs(targetPlayAreaVertex.z) * 1.5f);
-        nPlat.GetComponent<MeshRenderer>().material.SetVector("_Size", nPlat.transform.localScale);
-        nPlat.GetComponent<MeshRenderer>().material.SetFloat("_Learning", 0);
-        NetworkServer.Spawn(nPlat);
-        Platform = nPlat;
-        platformId = Platform.GetComponent<NetworkIdentity>().netId;
+        Platform.transform.localScale = new Vector3(Mathf.Abs(targetPlayAreaVertex.x) * 1.5f, 1.0f, Mathf.Abs(targetPlayAreaVertex.z) * 1.5f);
+        Platform.GetComponent<MeshRenderer>().material.SetVector("_Size", Platform.transform.localScale);
+        Platform.GetComponent<MeshRenderer>().material.SetFloat("_Learning", 0);
 
 
 
-        //Spawn and Sync Title
-        Vector3 tPos = new Vector3(0f, 1.5f, -3f);
-        GameObject nTitle = (GameObject)Instantiate(TitlePrefab, tPos, Quaternion.Euler(0, 180f, 0));
-        nTitle.GetComponent<MeshRenderer>().material.SetVector("_Scale", nTitle.transform.localScale);
-        NetworkServer.Spawn(nTitle);
-        Title = nTitle;
-        titleId = Title.GetComponent<NetworkIdentity>().netId;
+
+        //SetUp Title
+          //Vector3 tPos = new Vector3(0f, 1.5f, -3f);
+          //GameObject nTitle = (GameObject)Instantiate(TitlePrefab, tPos, Quaternion.Euler(0, 180f, 0));
+        Title.GetComponent<MeshRenderer>().material.SetVector("_Scale", Title.transform.localScale);
         
 
         //Spawn and Sync Highscore balls
@@ -361,31 +351,20 @@ public class NetworkedBallGame : NetworkBehaviour
         //RpcSetHighScoreBalls(Game.current.highScore);
 
 
-        //Spawn and Sync Momma Ball
-        GameObject nMom = (GameObject)Instantiate(MommaPrefab, new Vector3(0,3,0), new Quaternion());
-        NetworkServer.Spawn(nMom);
-        Momma = nMom;
-        mommaID = Momma.GetComponent<NetworkIdentity>().netId;
-        ScoreText = Momma.transform.Find("Score").gameObject;
+        //Momma already SetUp
+        //ScoreText = Momma.transform.Find("Score").gameObject;
 
-        //Spawn and Sync MenuBaby
-        GameObject nMBaby = (GameObject)Instantiate(BabyPrefab, new Vector3(0, 1, -2), Quaternion.identity);
-        nMBaby.GetComponent<Rigidbody>().drag = .7f - (score / 100);
-        nMBaby.GetComponent<Rigidbody>().mass = .2f - (score / 340);
-        nMBaby.GetComponent<Rigidbody>().angularDrag = 200;
-        nMBaby.GetComponent<Rigidbody>().freezeRotation = true;
-        nMBaby.transform.localScale = nMBaby.transform.localScale * (2.0f - (score / 30));
-        nMBaby.GetComponent<MeshRenderer>().material.SetFloat("_Score", (float)score);
-        nMBaby.GetComponent<TrailRenderer>().enabled = false;
-        NetworkServer.Spawn(nMBaby);
-        menuBaby = nMBaby;
-        menuBabyID = menuBaby.GetComponent<NetworkIdentity>().netId;
+        //Setup MenuBaby
+        menuBaby.GetComponent<Rigidbody>().drag = .7f - (score / 100);
+        menuBaby.GetComponent<Rigidbody>().mass = .2f - (score / 340);
+        menuBaby.GetComponent<Rigidbody>().angularDrag = 200;
+        //menuBaby.GetComponent<Rigidbody>().freezeRotation = true;
+        menuBaby.transform.localScale = menuBaby.transform.localScale * (2.0f - (score / 30));
+        menuBaby.GetComponent<MeshRenderer>().material.SetFloat("_Score", (float)score);
+        //menuBaby.GetComponent<TrailRenderer>().enabled = false;
 
-        //Spawn and Sync Start Button
-        GameObject nSB = (GameObject)Instantiate(StartButtonPrefab, new Vector3(0, 1, -Platform.transform.localScale.z * .55f), new Quaternion());
-        NetworkServer.Spawn(nSB);
-        StartButton = nSB;
-        startButtonId = StartButton.GetComponent<NetworkIdentity>().netId;
+        //SetUp Start Button
+        StartButton.transform.position = new Vector3(0, 1, -Platform.transform.localScale.z * .55f);
 
         
         //Set active player to first spawn player object
@@ -396,101 +375,35 @@ public class NetworkedBallGame : NetworkBehaviour
         }
         activePlayerId = activePlayer.GetComponent<NetworkIdentity>().netId;
 
-        Room.GetComponent<RoomNetworked>().handL = activePlayer.GetComponent<NetworkedPlayer>().shield;
-        Room.GetComponent<RoomNetworked>().handR = activePlayer.GetComponent<NetworkedPlayer>().hand;
+        GameObject.FindObjectOfType<RoomNetworked>().handL = activePlayer.GetComponent<NetworkedPlayer>().shield;
+        GameObject.FindObjectOfType<RoomNetworked>().handR = activePlayer.GetComponent<NetworkedPlayer>().hand;
         //activePlayerHand = GameObject.Find("handR");
-        syncedObejctsSpawned = true;
         syncedObjectsSetUp = true;
     }
 
-    private void ClientSetupSyncObjects()
+    private void ClientSyncObjects()
     {
-        //Grab all Network IDs
-        NetworkIdentity[] netIds = GameObject.FindObjectsOfType<NetworkIdentity>();
+        //Sync Platform
+        Platform.transform.localScale = new Vector3(Mathf.Abs(targetPlayAreaVertex.x) * 1.5f, 1.0f, Mathf.Abs(targetPlayAreaVertex.z) * 1.5f);
+        Platform.GetComponent<MeshRenderer>().material.SetVector("_Size", Platform.transform.localScale);
+        Platform.GetComponent<MeshRenderer>().material.SetFloat("_Learning", 0);
 
-        int objectsFound = 0; //Used to break out of foreachLoop
-        int hsBallsFound = 0; //Used stop going into forloop
+        //Sync Menu Baby
+        menuBaby.GetComponent<Rigidbody>().drag = .7f - (score / 100);
+        menuBaby.GetComponent<Rigidbody>().mass = .2f - (score / 340);
+        menuBaby.GetComponent<Rigidbody>().angularDrag = 200;
+        //menuBaby.GetComponent<Rigidbody>().freezeRotation = true;
+        menuBaby.transform.localScale = menuBaby.transform.localScale * (2.0f - (score / 30));
+        menuBaby.GetComponent<MeshRenderer>().material.SetFloat("_Score", (float)score);
 
-        //Find and Sync Room
-        foreach(NetworkIdentity nI in netIds)
-        {
-            if(nI.netId == roomId)
-            {
-                Room = nI.gameObject;
-                objectsFound++;
-            }
-            else if (nI.netId == platformId)
-            {
-                Platform = nI.gameObject;
-                Platform.transform.localScale = new Vector3(Mathf.Abs(targetPlayAreaVertex.x) * 1.5f, 1.0f, Mathf.Abs(targetPlayAreaVertex.z) * 1.5f);
-                Platform.GetComponent<MeshRenderer>().material.SetVector("_Size", Platform.transform.localScale);
-                Platform.GetComponent<MeshRenderer>().material.SetFloat("_Learning", 0);
-                objectsFound++;
-            }
-            else if (nI.netId == titleId)
-            {
-                Title = nI.gameObject;
-                Title.GetComponent<MeshRenderer>().material.SetVector("_Scale", Title.transform.localScale);
-                objectsFound++;
-            }
-            else if(nI.netId == mommaID)
-            {
-                Momma = nI.gameObject;
-                ScoreText = Momma.transform.Find("Score").gameObject;
-                objectsFound++;
-            }
-            else if (nI.netId == menuBabyID)
-            {
-                menuBaby = nI.gameObject;
-                menuBaby.GetComponent<Rigidbody>().drag = .7f - (score / 100);
-                menuBaby.GetComponent<Rigidbody>().mass = .2f - (score / 340);
-                menuBaby.GetComponent<Rigidbody>().angularDrag = 200;
-                menuBaby.GetComponent<Rigidbody>().freezeRotation = true;
-                menuBaby.transform.localScale = menuBaby.transform.localScale * (2.0f - (score / 30));
-                menuBaby.GetComponent<MeshRenderer>().material.SetFloat("_Score", (float)score);
-                menuBaby.GetComponent<TrailRenderer>().enabled = false;
-                objectsFound++;
-            }
-            else if(nI.netId == startButtonId)
-            {
-                StartButton = nI.gameObject;
-                objectsFound++;
-            }
-            else if(nI.netId == activePlayerId)
-            {
-                activePlayer = nI.gameObject;
-                objectsFound++;
-            }
-            else if(hsBallsFound < highScoreBallIDs.Count)
-            {
-                for(int i = 0; i < highScoreBallIDs.Count; i++)
-                {
-                    if(nI.netId == highScoreBallIDs[i])
-                    {
-                        highScoreBalls.Add(nI.gameObject);
-                        SetHighScoreBallPitch(nI.gameObject);
-                        hsBallsFound++;
-                        if(hsBallsFound >= highScoreBallIDs.Count)
-                        {
-                            setHighScoreBalls(score);
-                            objectsFound++;
-                        }
-                        i = 100;
-                    }
-                }
-            }
-
-            if(objectsFound >= 8)
-            {
-                break;
-            }
-        }
+        //Sync Title
+        Title.GetComponent<MeshRenderer>().material.SetVector("_Scale", Title.transform.localScale);
 
         //TODO: Test if Highscoreballs must be found here
         //RpcSetHighScoreBalls(Game.current.highScore);
-        
-        Room.GetComponent<RoomNetworked>().handL = activePlayer.GetComponent<NetworkedPlayer>().shield;
-        Room.GetComponent<RoomNetworked>().handR = activePlayer.GetComponent<NetworkedPlayer>().hand;
+
+        //Room.GetComponent<RoomNetworked>().handL = activePlayer.GetComponent<NetworkedPlayer>().shield;
+        //Room.GetComponent<RoomNetworked>().handR = activePlayer.GetComponent<NetworkedPlayer>().hand;
         //activePlayerHand = GameObject.Find("handR");
         syncedObjectsSetUp = true;
     }
@@ -881,7 +794,10 @@ public class NetworkedBallGame : NetworkBehaviour
     //CONVERTED
     public void MommaHit(GameObject goHit)
     {
-
+        if (!isServer)
+        {
+            return;
+        }
         // Make a new object
         GameObject go = (GameObject)Instantiate(BabyPrefab, new Vector3(), new Quaternion());
         go.transform.position = goHit.transform.position;
@@ -1009,36 +925,43 @@ public class NetworkedBallGame : NetworkBehaviour
     //CONVERTED
     void resizeRoom()
     {
+        GameObject room = GameObject.Find("Room");
+        if(room != null)
+        {
+            float size = getSizeFromScore();
 
-        float size = getSizeFromScore();
-
-        Room.transform.localScale = new Vector3(size, size / 2 + .6f, size);
-        Room.transform.position = new Vector3(0, size / 4 + .3f, 0);
+            room.transform.localScale = new Vector3(size, size / 2 + .6f, size);
+            room.transform.position = new Vector3(0, size / 4 + .3f, 0);
 
 
-        roomSize = Room.transform.localScale;
+            roomSize = room.transform.localScale;
+        }
+        
     }
 
     //CONVERTED
     void resizeRoomLarge()
     {
+        GameObject room = GameObject.Find("Room");
+        if(room != null)
+        {
+            float size = getSizeFromScore();
 
-        float size = getSizeFromScore();
-
-        Room.transform.localScale = new Vector3(10000, 10000, 100000);
-        Room.transform.position = new Vector3(0, 500, 0);
+            room.transform.localScale = new Vector3(10000, 10000, 100000);
+            room.transform.position = new Vector3(0, 500, 0);
 
 
-        roomSize = Room.transform.localScale;
-
+            roomSize = room.transform.localScale;
+        }
     }
 
     //CONVERTED
     private void SetRoomScale(Vector3 newScale)
     {
-        if(Room != null)
+        GameObject room = GameObject.Find("Room");
+        if (room != null)
         {
-            Room.transform.localScale = newScale;
+           room.transform.localScale = newScale;
         }
         
     }
@@ -1091,7 +1014,7 @@ public class NetworkedBallGame : NetworkBehaviour
 
             Momma.transform.position = new Vector3(0, -1000000.0f, 0);
 
-            Room.GetComponent<RoomNetworked>().active = false;
+            GameObject.Find("Room").GetComponent<RoomNetworked>().active = false;
             RpcSetRoomActive(false);
             resizeRoomLarge();
 
@@ -1132,7 +1055,7 @@ public class NetworkedBallGame : NetworkBehaviour
 
 
             resizeRoom();
-            Room.GetComponent<RoomNetworked>().active = true;
+            GameObject.Find("Room").GetComponent<RoomNetworked>().active = true;
             RpcSetRoomActive(true);
 
 
@@ -1396,7 +1319,7 @@ public class NetworkedBallGame : NetworkBehaviour
     [ClientRpc]
     void RpcSetRoomActive(bool enable)
     {
-        Room.GetComponent<RoomNetworked>().active = enable;
+        GameObject.Find("Room").GetComponent<RoomNetworked>().active = enable;
     }
 
     [ClientRpc]

@@ -64,7 +64,8 @@ public class BlarpNetworkManager : NetworkManager
     {
         base.OnStopServer();
 
-        GameObject.Destroy(NetworkedBallGame.nBallGame.gameObject);
+        GameObject.Destroy(GameObject.FindObjectOfType<NetworkedBallGame>().gameObject);
+        //GameObject.Destroy(NetworkedBallGame.nBallGame.gameObject);
     }
 }
 

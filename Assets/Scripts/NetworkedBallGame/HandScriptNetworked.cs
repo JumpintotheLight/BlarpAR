@@ -67,11 +67,13 @@ public class HandScriptNetworked : NetworkBehaviour
             if (other.gameObject.name.Contains("Baby"))
             {
                 Debug.Log("HandHit-Collison");
-                NetworkedBallGame.nBallGame.HandHit(other.gameObject);
+                GameObject.FindObjectOfType<NetworkedBallGame>().HandHit(other.gameObject);
+                //NetworkedBallGame.nBallGame.HandHit(other.gameObject);
             }
             else if (other.gameObject.name.Contains("Momma"))
             {
-                NetworkedBallGame.nBallGame.moveMomma();
+                GameObject.FindObjectOfType<NetworkedBallGame>().moveMomma();
+                //NetworkedBallGame.nBallGame.moveMomma();
             }
         }
     }

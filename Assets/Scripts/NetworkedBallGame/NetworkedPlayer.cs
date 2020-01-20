@@ -242,13 +242,15 @@ public class NetworkedPlayer : NetworkBehaviour
     [Command]
     void CmdSetActivePlayer()
     {
-        NetworkedBallGame.nBallGame.SetActivePlayerID(netId);
+        GameObject.FindObjectOfType<NetworkedBallGame>().SetActivePlayerID(netId);
+        //NetworkedBallGame.nBallGame.SetActivePlayerID(netId);
     }
 
     [Command]
     void CmdUnlockActivePlayer()
     {
-        NetworkedBallGame.nBallGame.UnlockActivePlayer();
+        GameObject.FindObjectOfType<NetworkedBallGame>().UnlockActivePlayer();
+        //NetworkedBallGame.nBallGame.UnlockActivePlayer();
         isActivePlayer = false;
     }
     

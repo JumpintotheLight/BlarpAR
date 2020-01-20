@@ -445,8 +445,8 @@ public class RoomNetworked : NetworkBehaviour
         setTransValues();
         setCollisionValues();
 
-        computeShader.SetVector("_HandL", handL.transform.position);
-        computeShader.SetVector("_HandR", handR.transform.position);
+        computeShader.SetVector("_HandL", handL != null ? handL.transform.position : Vector3.zero);
+        computeShader.SetVector("_HandR", handR != null ? handR.transform.position : Vector3.zero);
 
 
         computeShader.SetFloat("_DeltaTime", Time.deltaTime);
