@@ -1294,14 +1294,14 @@ public class NetworkedBallGame : NetworkBehaviour
     }
 
     //-------Delegates and Callbacks-----------
-    void OnBabyIDListUpdated(SyncListUInt.Operation op, int index, uint id)
+    void OnBabyIDListUpdated(SyncListUInt.Operation op, int index, uint oldId, uint newId)
     {
         switch (op)
         {
             case SyncListUInt.Operation.OP_ADD:
                 foreach(NetworkIdentity netId in GameObject.FindObjectsOfType<NetworkIdentity>())
                 {
-                    if(netId.netId == id)
+                    if(netId.netId == newId)
                     {
                         Babies.Add(netId.gameObject);
                         PlayNewBabyAudio(netId.gameObject);

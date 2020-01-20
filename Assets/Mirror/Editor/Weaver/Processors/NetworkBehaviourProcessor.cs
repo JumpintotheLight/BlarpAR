@@ -1,5 +1,4 @@
 // this class processes SyncVars, Cmds, Rpcs, etc. of NetworkBehaviours
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using Mono.CecilX;
@@ -133,7 +132,7 @@ namespace Mirror.Weaver
                 MethodReference writeFunc = Writers.GetWriteFunc(pd.ParameterType);
                 if (writeFunc == null)
                 {
-                    Weaver.Error($"{md} has invalid parameter {pd}" );
+                    Weaver.Error($"{md} has invalid parameter {pd}");
                     return false;
                 }
                 // use built-in writer func on writer object
@@ -571,7 +570,6 @@ namespace Mirror.Weaver
 
             // Generates: end if (initialState);
             serWorker.Append(initialStateLabel);
-
 
             // get dirty bits
             serWorker.Append(serWorker.Create(OpCodes.Ldarg_1));

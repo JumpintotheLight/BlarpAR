@@ -79,7 +79,7 @@ LightmapSettings:
     m_PVRFilterTypeDirect: 0
     m_PVRFilterTypeIndirect: 0
     m_PVRFilterTypeAO: 0
-    m_PVRFilteringMode: 1
+    m_PVRFilteringMode: 2
     m_PVRCulling: 1
     m_PVRFilteringGaussRadiusDirect: 1
     m_PVRFilteringGaussRadiusIndirect: 5
@@ -313,7 +313,7 @@ GameObject:
   - component: {fileID: 159607908}
   - component: {fileID: 159607912}
   - component: {fileID: 159607913}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -360,7 +360,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverOnly: 1
-  localPlayerAuthority: 0
   m_AssetId: 
   m_SceneId: 1834901131
 --- !u!114 &159607913
@@ -385,10 +384,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 909502395}
     m_Modifications:
-    - target: {fileID: 160176457, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
-      propertyPath: m_Name
-      value: reconTank
-      objectReference: {fileID: 0}
     - target: {fileID: 160176456, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -20
@@ -431,6 +426,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 160176456, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 160176457, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
+      propertyPath: m_Name
+      value: reconTank
+      objectReference: {fileID: 0}
+    - target: {fileID: 160176458, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
+      propertyPath: forceHidden
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 160176459, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
@@ -547,8 +550,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 40
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -572,7 +575,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 50, z: 0}
+  m_LocalPosition: {x: 0, y: 70, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -844,6 +847,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Sphere
+      objectReference: {fileID: 0}
+    - target: {fileID: 855244094988030908, guid: f6d08eb9a8e35d84fa30a7e3ae64181a,
+        type: 3}
+      propertyPath: forceHidden
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 855244094988030909, guid: f6d08eb9a8e35d84fa30a7e3ae64181a,
         type: 3}
@@ -1166,6 +1174,11 @@ PrefabInstance:
     - target: {fileID: 6852530814182375316, guid: 12a4c14e672c00b4b840f937d824b890,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6852530814182375317, guid: 12a4c14e672c00b4b840f937d824b890,
+        type: 3}
+      propertyPath: forceHidden
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6852530814182375318, guid: 12a4c14e672c00b4b840f937d824b890,
@@ -1815,12 +1828,7 @@ MonoBehaviour:
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 1
-  spawnPrefabs:
-  - {fileID: 1076878374699499732, guid: e1971f4a8c7661546bc509b44bd91b80, type: 3}
-  - {fileID: 5623359707189648430, guid: 4ff300cf6bb3c6342a9552c4f18788c8, type: 3}
-  - {fileID: 6852530814182375312, guid: 12a4c14e672c00b4b840f937d824b890, type: 3}
-  - {fileID: 855244094988030905, guid: f6d08eb9a8e35d84fa30a7e3ae64181a, type: 3}
-  - {fileID: 160176457, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
+  spawnPrefabs: []
   subScenes:
   - SubScene
 --- !u!4 &1661834279
@@ -2088,6 +2096,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SceneId
       value: 2061538488
+      objectReference: {fileID: 0}
+    - target: {fileID: 5697694911122891659, guid: e1971f4a8c7661546bc509b44bd91b80,
+        type: 3}
+      propertyPath: forceHidden
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e1971f4a8c7661546bc509b44bd91b80, type: 3}

@@ -49,13 +49,13 @@ namespace Mirror
                     // This is a special case where we have client authority but we have not assigned the client who has
                     // authority over it, no animator data will be sent over the network by the server.
                     //
-                    // So we check here for a clientAuthorityOwner and if it is null we will
+                    // So we check here for a connectionToClient and if it is null we will
                     // let the server send animation data until we receive an owner.
-                    if (netIdentity != null && netIdentity.clientAuthorityOwner == null)
+                    if (netIdentity != null && netIdentity.connectionToClient == null)
                         return true;
                 }
 
-                return hasAuthority;
+                return (hasAuthority && clientAuthority);
             }
         }
 
@@ -132,7 +132,7 @@ namespace Mirror
 
         void CheckSendRate()
         {
-            if (sendMessagesAllowed && syncInterval != 0 && sendTimer < Time.time)
+            if (sendMessagesAllowed && syncInterval > 0 && sendTimer < Time.time)
             {
                 sendTimer = Time.time + syncInterval;
 
@@ -170,7 +170,7 @@ namespace Mirror
 
         void HandleAnimMsg(int stateHash, float normalizedTime, int layerId, NetworkReader reader)
         {
-            if (hasAuthority)
+            if (hasAuthority && clientAuthority)
                 return;
 
             // usually transitions will be triggered by parameters, if not, play anims directly.
@@ -186,7 +186,7 @@ namespace Mirror
 
         void HandleAnimParamsMsg(NetworkReader reader)
         {
-            if (hasAuthority)
+            if (hasAuthority && clientAuthority)
                 return;
 
             ReadParameters(reader);
@@ -299,11 +299,11 @@ namespace Mirror
         /// Custom Serialization
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="forceAll"></param>
+        /// <param name="initialState"></param>
         /// <returns></returns>
-        public override bool OnSerialize(NetworkWriter writer, bool forceAll)
+        public override bool OnSerialize(NetworkWriter writer, bool initialState)
         {
-            if (forceAll)
+            if (initialState)
             {
                 for (int i = 0; i < animator.layerCount; i++)
                 {
@@ -320,7 +320,7 @@ namespace Mirror
                         writer.WriteSingle(st.normalizedTime);
                     }
                 }
-                WriteParameters(writer, forceAll);
+                WriteParameters(writer, initialState);
                 return true;
             }
             return false;

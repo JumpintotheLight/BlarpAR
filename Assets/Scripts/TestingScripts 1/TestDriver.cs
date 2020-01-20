@@ -97,7 +97,7 @@ public class TestDriver : NetworkBehaviour
         //RpcPrintAddBaby(babies.Count - 1);
     }
 
-    void OnBabiesListUpdated(SyncListGO.Operation op, int index, GameObject baby)
+    void OnBabiesListUpdated(SyncListGO.Operation op, int index, GameObject baby, GameObject newBaby)
     {
         switch (op)
         {
