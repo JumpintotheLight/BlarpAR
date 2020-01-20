@@ -17,11 +17,25 @@ public class MommaNetworked : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-
         transform.LookAt(Camera.main.gameObject.transform);
 
+        //UpdateMesh();
     }
 
+    /*private void UpdateMesh()
+    {
+        if(NetworkedBallGame.nBallGame != null)
+        {
+            float score = NetworkedBallGame.nBallGame.score;
+
+            float base100 = Mathf.Floor(score / 100);
+            float base10 = Mathf.Floor((score - (base100 * 100)) / 10);
+            float base1 = score - (base10 * 10);
+
+            this.GetComponent<MeshRenderer>().material.SetInt("_Digit1", (int)base1);
+            this.GetComponent<MeshRenderer>().material.SetInt("_Digit2", (int)base10);
+        }
+    }*/
 
     void OnCollisionEnter(Collision c)
     {
