@@ -9,10 +9,8 @@ public class NetworkedPlayer : NetworkBehaviour
     [SerializeField]
     private bool isVRPlayer = true;
     public GameObject vrCameraRigPrefab;
-    [SyncVar]
     public GameObject hand;
     public GameObject handPrefab;
-    [SyncVar]
     public GameObject shield;
     public GameObject shieldPrefab;
     public GameObject networkedBallGamePrefab;
@@ -23,8 +21,12 @@ public class NetworkedPlayer : NetworkBehaviour
     private SteamVR_Controller.Device shieldDevice;
     //private GameObject handInstance;
     //private GameObject shieldInstance;
+    [SyncVar]
     private float handTriggerVal = 0;
+    [SyncVar]
     private float shieldTriggerVal = 0;
+    [SyncVar]
+    private Vector3 handVelocity = Vector3.zero;
 
     private bool isHandTriggerPressed = false;
     private bool hasHandTriggerBeenPressed = false;
@@ -53,6 +55,7 @@ public class NetworkedPlayer : NetworkBehaviour
 
             vrCameraRigInstance = (GameObject)Instantiate(vrCameraRigPrefab, transform.position, transform.rotation);
 
+            /*
             //Spawn Hand
             GameObject nh = (GameObject)Instantiate(handPrefab, this.transform.position, Quaternion.identity);
             NetworkServer.Spawn(nh);
@@ -62,6 +65,7 @@ public class NetworkedPlayer : NetworkBehaviour
             GameObject ns = (GameObject)Instantiate(shieldPrefab, this.transform.position, Quaternion.identity);
             NetworkServer.Spawn(ns);
             shield = ns;
+            */
 
             TryDetectControllers();
         }
@@ -75,17 +79,21 @@ public class NetworkedPlayer : NetworkBehaviour
             mouseLook.Init(transform, Camera.main.transform);
             devicesSet = true;
 
+
+            shield.transform.position = this.transform.position + new Vector3(0, 0, 0.394f);
+            /*
             //Spawn Hand
             GameObject nh = (GameObject)Instantiate(handPrefab, this.transform.position, Quaternion.identity);
             NetworkServer.Spawn(nh);
             hand = nh;
-            hand.transform.parent = this.transform;
+            nh.transform.parent = this.transform;
 
             //Spawn Shield
             GameObject ns = (GameObject)Instantiate(shieldPrefab, this.transform.position + new Vector3(0,0, 0.394f), Quaternion.identity);
             NetworkServer.Spawn(ns);
             shield = ns;
-            shield.transform.parent = this.transform;
+            ns.transform.parent = this.transform;
+            */
 
         }
         
@@ -141,8 +149,9 @@ public class NetworkedPlayer : NetworkBehaviour
         if (isLocalPlayer && devicesSet)
         {
             QueryControllers();
+            handVelocity = hand.GetComponent<Rigidbody>().velocity;
             
-            CmdUpdateHandTrigger(handTriggerVal);
+            //CmdUpdateHandTrigger(handTriggerVal);
             CmdUpdateShield(shieldTriggerVal);
 
             if (hasHandTriggerBeenPressed)
@@ -224,19 +233,40 @@ public class NetworkedPlayer : NetworkBehaviour
 
     public Vector3 GetHandVelocity()
     {
-        return hand.GetComponent<HandScriptNetworked>().Velocity;
+        return handVelocity;
     }
 
-    [Command]
-    void CmdUpdateHandTrigger(float tV)
+    public void HandHit(GameObject other)
     {
-        hand.GetComponent<HandScriptNetworked>().TriggerVal = tV;
+        if (isServer)
+        {
+            GameObject.FindObjectOfType<NetworkedBallGame>().HandHit(other);
+        }
     }
+
+    public void MoveMomma()
+    {
+        if (isServer)
+        {
+            GameObject.FindObjectOfType<NetworkedBallGame>().moveMomma();
+        }
+    }
+
 
     [Command]
     void CmdUpdateShield(float tV)
     {
         shield.GetComponent<ShieldNetworked>().UpdateShield(tV);
+        RpcUpdateShield(tV);
+    }
+
+    [ClientRpc]
+    void RpcUpdateShield(float tV)
+    {
+        if (!isServer)
+        {
+            shield.GetComponent<ShieldNetworked>().UpdateShield(tV);
+        }
     }
 
     [Command]

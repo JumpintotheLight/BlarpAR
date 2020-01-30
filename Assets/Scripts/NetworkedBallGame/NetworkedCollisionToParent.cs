@@ -14,7 +14,7 @@ public class NetworkedCollisionToParent : NetworkBehaviour
 
     void OnCollisionEnter(Collision c)
     {
-        if (isServer && c.gameObject.tag == "Baby")
+        if (c.gameObject.name.Contains("Baby"))
         {
             parent.GetComponent<RoomNetworked>().BabyHit(c);
         }

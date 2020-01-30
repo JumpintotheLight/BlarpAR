@@ -17,6 +17,7 @@ public enum GameState
 
 class SyncListGO : SyncList<GameObject> { }
 class SyncListUInt : SyncList<uint> { }
+class SyncListVector3 : SyncList<Vector3> { }
 
 public class NetworkedBallGame : NetworkBehaviour
 {
@@ -103,7 +104,7 @@ public class NetworkedBallGame : NetworkBehaviour
     public uint roomId;
 
     public GameObject Room; //GO of game's room*/
-    public GameObject roomPrefab; //Prefab of game room
+    //public GameObject roomPrefab; //Prefab of game room
 
     [SyncVar(hook = nameof(UpdateMommaMesh))]
     public float score;
@@ -142,8 +143,10 @@ public class NetworkedBallGame : NetworkBehaviour
 
     //Balls that show the high score in the main menu
 
-    readonly SyncListUInt highScoreBallIDs = new SyncListUInt();
-    List<GameObject> highScoreBalls = new List<GameObject>();
+    //readonly SyncListUInt highScoreBallIDs = new SyncListUInt();
+    public List<GameObject> highScoreBalls = new List<GameObject>();
+    readonly SyncListFloat hsBallScales = new SyncListFloat();
+    readonly SyncListVector3 hsBallPositions = new SyncListVector3();
     //readonly SyncListGO highScoreBalls = new SyncListGO();
 
 
@@ -306,10 +309,6 @@ public class NetworkedBallGame : NetworkBehaviour
     [Server]
     private void SetupSyncedObjects()
     {
-        //Spawn Room
-        GameObject nRoom = (GameObject)Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
-        nRoom.name = "Room";
-        NetworkServer.Spawn(nRoom);
 
         //SetUp Platform
         GameObject targetCameraRig = GameObject.Find("[CameraRig](Clone)");
@@ -332,10 +331,12 @@ public class NetworkedBallGame : NetworkBehaviour
           //Vector3 tPos = new Vector3(0f, 1.5f, -3f);
           //GameObject nTitle = (GameObject)Instantiate(TitlePrefab, tPos, Quaternion.Euler(0, 180f, 0));
         Title.GetComponent<MeshRenderer>().material.SetVector("_Scale", Title.transform.localScale);
-        
 
-        //Spawn and Sync Highscore balls
-        for (int i = 0; i < 10; i++)
+
+        //Setup Highscore balls
+        float rad = 0;
+        Vector3 p = Vector3.zero;
+        /*for (int i = 0; i < 10; i++)
         {
             float rad = Random.Range(4, 10);
             Vector3 p = Random.onUnitSphere * rad;
@@ -347,8 +348,20 @@ public class NetworkedBallGame : NetworkBehaviour
             SetHighScoreBallPitch(nHSBall);
             highScoreBallIDs.Add(nHSBall.GetComponent<NetworkIdentity>().netId);
         }
-        setHighScoreBalls(Game.current.highScore);
+        setHighScoreBalls(Game.current.highScore);*/
         //RpcSetHighScoreBalls(Game.current.highScore);
+        foreach(GameObject hsb in highScoreBalls)
+        {
+            rad = Random.Range(4, 10);
+            p = Random.onUnitSphere * rad;
+
+            hsb.transform.position = p;
+            hsb.transform.localScale = new Vector3(rad / 4, rad / 4, rad / 4);
+            hsBallScales.Add(rad);
+            hsBallPositions.Add(hsb.transform.localScale);
+            SetHighScoreBallPitch(hsb, Random.Range(0, 1));
+        }
+        setHighScoreBalls(Game.current.highScore);
 
 
         //Momma already SetUp
@@ -399,12 +412,21 @@ public class NetworkedBallGame : NetworkBehaviour
         //Sync Title
         Title.GetComponent<MeshRenderer>().material.SetVector("_Scale", Title.transform.localScale);
 
-        //TODO: Test if Highscoreballs must be found here
-        //RpcSetHighScoreBalls(Game.current.highScore);
+        //Sync HSBalls
+        for(int i = 0; i < highScoreBalls.Count; i++)
+        {
+            highScoreBalls[i].transform.position = hsBallPositions[i];
+            highScoreBalls[i].transform.localScale = new Vector3(hsBallScales[i] / 4, hsBallScales[i] / 4, hsBallScales[i] / 4);
+
+            SetHighScoreBallPitch(highScoreBalls[i], Random.Range(0, 1));
+        }
 
         //Room.GetComponent<RoomNetworked>().handL = activePlayer.GetComponent<NetworkedPlayer>().shield;
         //Room.GetComponent<RoomNetworked>().handR = activePlayer.GetComponent<NetworkedPlayer>().hand;
         //activePlayerHand = GameObject.Find("handR");
+
+        ChangeActivePlayer(activePlayerId);
+
         syncedObjectsSetUp = true;
     }
 
@@ -419,10 +441,10 @@ public class NetworkedBallGame : NetworkBehaviour
         float base1 = theScore - (base10 * 10);
         //print( base1 );
 
-        for (var i = 0; i < 10; i++)
+        foreach(GameObject hsb in highScoreBalls)
         {
-            highScoreBalls[i].GetComponent<MeshRenderer>().material.SetInt("_Digit1", (int)base1);
-            highScoreBalls[i].GetComponent<MeshRenderer>().material.SetInt("_Digit2", (int)base10);
+            hsb.GetComponent<MeshRenderer>().material.SetInt("_Digit1", (int)base1);
+            hsb.GetComponent<MeshRenderer>().material.SetInt("_Digit2", (int)base10);
         }
 
     }
@@ -430,11 +452,10 @@ public class NetworkedBallGame : NetworkBehaviour
     //CONVERTED
     void removeHighScoreBalls()
     {
-
-        for (var i = 0; i < 10; i++)
+        foreach (GameObject hsb in highScoreBalls)
         {
-            highScoreBalls[i].GetComponent<MeshRenderer>().enabled = false;
-            highScoreBalls[i].GetComponent<Collider>().enabled = false;
+            hsb.GetComponent<MeshRenderer>().enabled = false;
+            hsb.GetComponent<Collider>().enabled = false;
         }
 
 
@@ -443,13 +464,11 @@ public class NetworkedBallGame : NetworkBehaviour
     //CONVERTED
     void addHighScoreBalls()
     {
-
-        for (var i = 0; i < 10; i++)
+        foreach (GameObject hsb in highScoreBalls)
         {
-            highScoreBalls[i].GetComponent<MeshRenderer>().enabled = true;
-            highScoreBalls[i].GetComponent<Collider>().enabled = true;
+            hsb.GetComponent<MeshRenderer>().enabled = true;
+            hsb.GetComponent<Collider>().enabled = true;
         }
-
 
     }
 
@@ -656,7 +675,13 @@ public class NetworkedBallGame : NetworkBehaviour
     //CONVERTED
     void Update()
     {
-
+        if (isServer)
+        {
+            if(aPlayerLocked && activePlayer == null)
+            {
+                UnlockActivePlayer();
+            }
+        }
         //UpdateTutorial();
 
         #if UNITY_EDITOR
@@ -669,16 +694,20 @@ public class NetworkedBallGame : NetworkBehaviour
             return;
         }
 
-        //if( triggerDown == false ){
-        foreach (GameObject baby in Babies)
+        if(activePlayer != null)
         {
-            BabyUpdate(baby);
-        }
+            foreach (GameObject baby in Babies)
+            {
+                BabyUpdate(baby);
+            }
 
-        if (menuBaby.activeSelf)
-        {
-            BabyUpdate(menuBaby);
+            if (menuBaby.activeSelf)
+            {
+                BabyUpdate(menuBaby);
+            }
         }
+        //if( triggerDown == false ){
+        
 
         //Hand.transform.localScale = new Vector3(
     }
@@ -740,7 +769,10 @@ public class NetworkedBallGame : NetworkBehaviour
                 Debug.Log("Server not set up yet, wait to fixed update");
                 return;
             }
-            UpdateBabyForces(activePlayer);
+            if(activePlayer != null)
+            {
+                UpdateBabyForces(activePlayer);
+            }
         }
     }
 
@@ -824,6 +856,7 @@ public class NetworkedBallGame : NetworkBehaviour
         ScoreText.GetComponent<TextMesh>().text = score.ToString();
 
         resizeRoom();
+        RpcResizeRoom(false);
         moveMomma();
 
         int aLIndex = Random.Range(0, MommaHitAudioList.Length);
@@ -1017,6 +1050,7 @@ public class NetworkedBallGame : NetworkBehaviour
             GameObject.Find("Room").GetComponent<RoomNetworked>().active = false;
             RpcSetRoomActive(false);
             resizeRoomLarge();
+            RpcResizeRoom(true);
 
             menuBaby.SetActive(true);
             RpcSetMenuBabyActive(true);
@@ -1055,6 +1089,7 @@ public class NetworkedBallGame : NetworkBehaviour
 
 
             resizeRoom();
+            RpcResizeRoom(false);
             GameObject.Find("Room").GetComponent<RoomNetworked>().active = true;
             RpcSetRoomActive(true);
 
@@ -1246,10 +1281,10 @@ public class NetworkedBallGame : NetworkBehaviour
         audioSource.Play();
     }
 
-    private void SetHighScoreBallPitch(GameObject hsBall)
+    private void SetHighScoreBallPitch(GameObject hsBall, int index)
     {
-        int rand = Random.Range(0, 1);
-        hsBall.GetComponent<AudioSource>().clip = HighScoreAudioList[rand];
+        //int rand = Random.Range(0, 1);
+        hsBall.GetComponent<AudioSource>().clip = HighScoreAudioList[index];
         hsBall.GetComponent<AudioSource>().pitch = .5f;
     }
 
@@ -1345,5 +1380,19 @@ public class NetworkedBallGame : NetworkBehaviour
     void RpcClearBabies()
     {
         Babies.Clear();
+    }
+
+    [ClientRpc]
+    void RpcResizeRoom(bool resizeLarge)
+    {
+        if (!resizeLarge)
+        {
+            resizeRoom();
+        }
+        else
+        {
+            resizeRoomLarge();
+        }
+        
     }
 }

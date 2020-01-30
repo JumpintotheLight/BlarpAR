@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class ShieldNetworked : NetworkBehaviour
+public class ShieldNetworked : MonoBehaviour
 {
     public GameObject shieldObj;
 
@@ -28,22 +28,15 @@ public class ShieldNetworked : NetworkBehaviour
 
     public void UpdateShield(float triggerVal)
     {
-        if (isServer)
+        if(shieldObj != null)
         {
             shieldObj.transform.localPosition = triggerVal * startPos;
 
             shieldObj.transform.localScale = triggerVal * startScale;
+            Debug.Log("Sheild Present?: " + (shieldObj != null).ToString());
             mat.SetVector("_Size", shieldObj.transform.localScale);
-            RpcUpdateShield(triggerVal);
         }
-    }
-
-
-    [ClientRpc]
-    void RpcUpdateShield(float triggerVal)
-    {
-        shieldObj.transform.localScale = triggerVal * startScale;
-        mat.SetVector("_Size", shieldObj.transform.localScale);
+            
     }
 
 }

@@ -14,8 +14,6 @@ public struct CollisionInfo
 
 }
 
-class SyncListCollisionInfo : SyncList<CollisionInfo> { }
-
 public class RoomNetworked : NetworkBehaviour
 {
     public const int ts = 6;
@@ -34,7 +32,6 @@ public class RoomNetworked : NetworkBehaviour
     public Shader particleShader;
     public ComputeShader computeShader;
 
-    [SyncVar] //This property might only be useful to the Server
     private int collisionsThisFrame;
 
     private ComputeBuffer _vertBuffer;
@@ -97,41 +94,23 @@ public class RoomNetworked : NetworkBehaviour
     private float[] collisionValues;// = new float[ numCollisions * COLLISION_SIZE ];
 
     
-    [SyncVar]
     public int activeCollision = 0;
 
     //public CollisionInfo[] collisions;
-    readonly SyncListCollisionInfo collisions = new SyncListCollisionInfo();
+    public CollisionInfo[] collisions;
 
     // Use this for initialization
     //CONVERTED
     void Start()
     {
-        if (isServer)
-        {
-            foreach (Transform childTransform in transform)
-            {
-                NetworkedCollisionToParent colPar = childTransform.gameObject.AddComponent<NetworkedCollisionToParent>();
-                colPar.parent = transform.gameObject;
-                for(int i = 0; i < numCollisions; i++)
-                {
-                    CollisionInfo ci = new CollisionInfo
-                    {
-                        time = 0f,
-                        pos = Vector3.zero,
-                        dir = Vector3.zero,
-                        active = 0f,
-                        speed = 0f,
-                    };
-                    collisions.Add(ci);
-                }
-            }
-        }
         collisionValues = new float[numCollisions * COLLISION_SIZE];
-        //collisions = new CollisionInfo[numCollisions];
+        collisions = new CollisionInfo[numCollisions];
 
-        //TODO: Find out if this needs to be done for clients
-        
+        foreach (Transform childTransform in transform)
+        {
+            NetworkedCollisionToParent colPar = childTransform.gameObject.AddComponent<NetworkedCollisionToParent>();
+            colPar.parent = transform.gameObject;
+        }
 
 
         roomAudio = transform.gameObject.GetComponent<RoomAudio>();
@@ -384,10 +363,8 @@ public class RoomNetworked : NetworkBehaviour
 
             float min = 1.0f / (1.0f + Mathf.Abs((float)colInfo.time - (float)Time.time));
 
-            if (isServer)
-            {
-                colInfo.active = Mathf.Max(0.0f, min);
-            }
+            colInfo.active = Mathf.Max(0.0f, min);
+            
             //colInfo.active = 1.0f;
 
             //print( colInfo.pos );
@@ -462,10 +439,7 @@ public class RoomNetworked : NetworkBehaviour
 
         computeShader.Dispatch(_kernel, strideX, strideY, strideZ);
 
-        if (isServer)
-        {
-            collisionsThisFrame = 0;
-        }
+        collisionsThisFrame = 0;
     }
 
 
@@ -473,38 +447,29 @@ public class RoomNetworked : NetworkBehaviour
     //CONVERTED
     public void BabyHit(Collision c)
     {
-        if (isServer)
-        {
-            collisionsThisFrame++;
-            if (collisionsThisFrame > 2) { return; }
+        collisionsThisFrame++;
+        if (collisionsThisFrame > 2) { return; }
 
-            //      print(activeCollision);
-            CollisionInfo colInfo = collisions[activeCollision];
+        //      print(activeCollision);
+        CollisionInfo colInfo = collisions[activeCollision];
 
 
-            colInfo.dir = c.relativeVelocity;//.Normalize();
-            colInfo.speed = colInfo.dir.magnitude;
-            colInfo.dir.Normalize();
-            colInfo.time = Time.time;
-            colInfo.pos = c.gameObject.transform.position;
-            colInfo.active = 1.0f;
+        colInfo.dir = c.relativeVelocity;//.Normalize();
+        colInfo.speed = colInfo.dir.magnitude;
+        colInfo.dir.Normalize();
+        colInfo.time = Time.time;
+        colInfo.pos = c.gameObject.transform.position;
+        colInfo.active = 1.0f;
 
-            collisions[activeCollision] = colInfo;
+        collisions[activeCollision] = colInfo;
 
-            activeCollision++;
-            if (activeCollision == numCollisions) { activeCollision = 0; }
+        activeCollision++;
+        if (activeCollision == numCollisions) { activeCollision = 0; }
 
-            //setCollisionValues();
-            float pitch = colInfo.speed * .1f + .1f;
-            roomAudio.hit(pitch);
-            RpcRoomAudioHit(pitch);
-        }
-        
-    }
-
-    [ClientRpc]
-    void RpcRoomAudioHit(float pitch)
-    {
+        //setCollisionValues();
+        float pitch = colInfo.speed * .1f + .1f;
         roomAudio.hit(pitch);
+        
+        
     }
 }

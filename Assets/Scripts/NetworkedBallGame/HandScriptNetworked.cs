@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class HandScriptNetworked : NetworkBehaviour
+public class HandScriptNetworked : MonoBehaviour
 {
-    [SyncVar]
-    private float triggerVal;
-    [SyncVar]
-    private Vector3 velocity;
 
     // Start is called before the first frame update
     void Start()
@@ -21,26 +17,6 @@ public class HandScriptNetworked : NetworkBehaviour
     {
         
     }
-
-    void FixedUpdate()
-    {
-        if (isServer)
-        {
-            velocity = this.GetComponent<Rigidbody>().velocity;
-        }
-    }
-
-    public float TriggerVal
-    {
-        get { return triggerVal; }
-        set { triggerVal = value; }
-    }
-
-    public Vector3 Velocity
-    {
-        get { return velocity; }
-    }
-
 
     /*void OnCollisionEnter(Collision c)
     {
@@ -61,20 +37,18 @@ public class HandScriptNetworked : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("HandTriggerEntered");
-        if (isServer)
+       if (other.gameObject.name.Contains("Baby"))
         {
-            
-            if (other.gameObject.name.Contains("Baby"))
-            {
-                Debug.Log("HandHit-Collison");
-                GameObject.FindObjectOfType<NetworkedBallGame>().HandHit(other.gameObject);
-                //NetworkedBallGame.nBallGame.HandHit(other.gameObject);
-            }
-            else if (other.gameObject.name.Contains("Momma"))
-            {
-                GameObject.FindObjectOfType<NetworkedBallGame>().moveMomma();
-                //NetworkedBallGame.nBallGame.moveMomma();
-            }
+            Debug.Log("HandHit-Collison");
+            transform.parent.gameObject.GetComponent<NetworkedPlayer>().HandHit(other.gameObject);
+            //NetworkedBallGame.nBallGame.HandHit(other.gameObject);
+        }
+        else if (other.gameObject.name.Contains("Momma"))
+        {
+            transform.parent.gameObject.GetComponent<NetworkedPlayer>().MoveMomma();
+            //GameObject.FindObjectOfType<NetworkedBallGame>().moveMomma();
+            //NetworkedBallGame.nBallGame.moveMomma();
         }
     }
+    
 }
