@@ -58,8 +58,9 @@ public class TestDriver : NetworkBehaviour
             colorBall = newCB;
             SetBallColor(Color.red);
             cbColor = Color.red;
+            colorBall.GetComponent<Rigidbody>().isKinematic = false;
 
-            for(int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 floatTester.Add(0);
             }
@@ -112,21 +113,29 @@ public class TestDriver : NetworkBehaviour
 
     void UpdateMomma(int newScore)
     {
-        //Debug.Log("Updating Momma ball");
-        float base100 = Mathf.Floor(newScore / 100);
-        float base10 = Mathf.Floor((newScore - (base100 * 100)) / 10);
-        float base1 = newScore - (base10 * 10);
-        //print( base1 );
+        if(momma != null)
+        {
+            //Debug.Log("Updating Momma ball");
+            float base100 = Mathf.Floor(newScore / 100);
+            float base10 = Mathf.Floor((newScore - (base100 * 100)) / 10);
+            float base1 = newScore - (base10 * 10);
+            //print( base1 );
 
-        momma.GetComponent<MeshRenderer>().material.SetInt("_Digit1", (int)base1);
-        momma.GetComponent<MeshRenderer>().material.SetInt("_Digit2", (int)base10);
+            momma.GetComponent<MeshRenderer>().material.SetInt("_Digit1", (int)base1);
+            momma.GetComponent<MeshRenderer>().material.SetInt("_Digit2", (int)base10);
+
+        }
 
 
     }
 
     void SetBallColor(Color nColor)
     {
-        colorBall.GetComponent<MeshRenderer>().material.color = nColor;
+        if(colorBall != null)
+        {
+            colorBall.GetComponent<MeshRenderer>().material.color = nColor;
+        }
+        
     }
 
     [Server]

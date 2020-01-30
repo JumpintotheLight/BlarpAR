@@ -368,6 +368,7 @@ public class NetworkedBallGame : NetworkBehaviour
         //ScoreText = Momma.transform.Find("Score").gameObject;
 
         //Setup MenuBaby
+        menuBaby.GetComponent<Rigidbody>().isKinematic = false;
         menuBaby.GetComponent<Rigidbody>().drag = .7f - (score / 100);
         menuBaby.GetComponent<Rigidbody>().mass = .2f - (score / 340);
         menuBaby.GetComponent<Rigidbody>().angularDrag = 200;
@@ -776,12 +777,14 @@ public class NetworkedBallGame : NetworkBehaviour
         }
     }
 
+    [Server]
     public void SetActivePlayerID(uint playerNetID)
     {
         if(!aPlayerLocked)
         {
             activePlayerId = playerNetID;
             ChangeActivePlayer(playerNetID);
+            RpcChangeActivePlayer(playerNetID);
         }
     }
 
@@ -792,12 +795,15 @@ public class NetworkedBallGame : NetworkBehaviour
             if(netId.netId == newID)
             {
                 activePlayer = netId.gameObject;
-                activePlayer.GetComponent<NetworkedPlayer>().isActivePlayer = true;
-                aPlayerLocked = true;
-                menuBaby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
-                foreach (GameObject baby in Babies)
+                if (isServer)
                 {
-                    baby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
+                    activePlayer.GetComponent<NetworkedPlayer>().isActivePlayer = true;
+                    aPlayerLocked = true;
+                    menuBaby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
+                    foreach (GameObject baby in Babies)
+                    {
+                        baby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
+                    }
                 }
                 break;
             }
@@ -848,6 +854,7 @@ public class NetworkedBallGame : NetworkBehaviour
         //    go.GetComponent<SpringJoint>().enabled = false; connectedBody = HandR.GetComponent<Rigidbody>();
         NetworkServer.Spawn(go);
         BabyIDs.Add(go.GetComponent<NetworkIdentity>().netId);
+        go.GetComponent<Rigidbody>().isKinematic = false;
 
         score++;
         Game.current.lastScore = score;
@@ -1394,5 +1401,11 @@ public class NetworkedBallGame : NetworkBehaviour
             resizeRoomLarge();
         }
         
+    }
+
+    [ClientRpc]
+    void RpcChangeActivePlayer(uint nID)
+    {
+        ChangeActivePlayer(nID);
     }
 }
