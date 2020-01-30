@@ -782,6 +782,7 @@ public class NetworkedBallGame : NetworkBehaviour
     {
         if(!aPlayerLocked)
         {
+            activePlayer.GetComponent<NetworkedPlayer>().isActivePlayer = false;
             activePlayerId = playerNetID;
             ChangeActivePlayer(playerNetID);
             RpcChangeActivePlayer(playerNetID);
@@ -805,9 +806,15 @@ public class NetworkedBallGame : NetworkBehaviour
                         baby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
                     }
                 }
+                Debug.Log("Active Player changed to netID " + newID);
                 break;
             }
         }
+    }
+
+    public void LockActivePlayer()
+    {
+        aPlayerLocked = true;
     }
 
     public void UnlockActivePlayer()
@@ -1406,6 +1413,9 @@ public class NetworkedBallGame : NetworkBehaviour
     [ClientRpc]
     void RpcChangeActivePlayer(uint nID)
     {
-        ChangeActivePlayer(nID);
+        if (!isServer)
+        {
+            ChangeActivePlayer(nID);
+        }
     }
 }

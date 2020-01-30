@@ -33,7 +33,7 @@ public class ShieldNetworked : MonoBehaviour
             shieldObj.transform.localPosition = triggerVal * startPos;
 
             shieldObj.transform.localScale = triggerVal * startScale;
-            Debug.Log("Sheild Present?: " + (shieldObj != null).ToString());
+            //Debug.Log("Sheild Present?: " + (shieldObj != null).ToString());
             mat.SetVector("_Size", shieldObj.transform.localScale);
         }
             

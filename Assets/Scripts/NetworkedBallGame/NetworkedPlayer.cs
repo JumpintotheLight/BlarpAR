@@ -23,7 +23,6 @@ public class NetworkedPlayer : NetworkBehaviour
     //private GameObject shieldInstance;
     [SyncVar]
     private float handTriggerVal = 0;
-    [SyncVar]
     private float shieldTriggerVal = 0;
     [SyncVar]
     private Vector3 handVelocity = Vector3.zero;
@@ -36,6 +35,8 @@ public class NetworkedPlayer : NetworkBehaviour
     [SyncVar]
     public bool isActivePlayer = false;
     private MouseLook mouseLook;
+
+    private float hTV = 0;
 
 
     void Start()
@@ -55,6 +56,8 @@ public class NetworkedPlayer : NetworkBehaviour
 
             vrCameraRigInstance = (GameObject)Instantiate(vrCameraRigPrefab, transform.position, transform.rotation);
 
+            hand.GetComponent<copyPosition>().enabled = true;
+            shield.GetComponent<copyPosition>().enabled = true;
             /*
             //Spawn Hand
             GameObject nh = (GameObject)Instantiate(handPrefab, this.transform.position, Quaternion.identity);
@@ -156,7 +159,14 @@ public class NetworkedPlayer : NetworkBehaviour
 
             if (hasHandTriggerBeenPressed)
             {
-                CmdSetActivePlayer();
+                if (isActivePlayer)
+                {
+                    CmdLockActivePlayer();
+                }
+                else
+                {
+                    CmdSetActivePlayer();
+                }
             }
             if (hasHandTriggerBeenReleased)
             {
@@ -177,20 +187,22 @@ public class NetworkedPlayer : NetworkBehaviour
         if (isVRPlayer)
         { 
             //handTriggerVal = handDevice.GetTouchDown(SteamVR_Controller.ButtonMask.Trigger) ? 1f : 0;
-            handTriggerVal = handDevice.GetState().rAxis1.x;
-            Debug.Log("HTRIGGER: " + handTriggerVal);
+            hTV = handDevice.GetState().rAxis1.x;
+            //Debug.Log("HTRIGGER: " + handTriggerVal);
             //shieldTriggerVal = shieldDevice.GetTouchDown(SteamVR_Controller.ButtonMask.Trigger) ? 1f : 0;
             shieldTriggerVal = shieldDevice.GetState().rAxis1.x;
         }
         else
         {
-            handTriggerVal = Input.GetKey(KeyCode.Space) ? 1f : 0f;
+            hTV = Input.GetKey(KeyCode.Space) ? 1f : 0f;
             shieldTriggerVal = Input.GetKey(KeyCode.LeftShift) ? 1f : 0f;
         }
 
+        CmdUpdateHandValues(hTV, hand.GetComponent<Rigidbody>().velocity);
+
         if (!isHandTriggerPressed)
         {
-            if (handTriggerVal > 0)
+            if (hTV > 0)
             {
                 isHandTriggerPressed = true;
                 hasHandTriggerBeenPressed = true;
@@ -198,7 +210,7 @@ public class NetworkedPlayer : NetworkBehaviour
         }
         else
         {
-            if (handTriggerVal <= 0)
+            if (hTV <= 0)
             {
                 isHandTriggerPressed = false;
                 hasHandTriggerBeenReleased = true;
@@ -270,6 +282,13 @@ public class NetworkedPlayer : NetworkBehaviour
     }
 
     [Command]
+    void CmdUpdateHandValues(float handTrig, Vector3 handVel)
+    {
+        handTriggerVal = handTrig;
+        handVelocity = handVel;
+    }
+
+    [Command]
     void CmdSetActivePlayer()
     {
         GameObject.FindObjectOfType<NetworkedBallGame>().SetActivePlayerID(netId);
@@ -277,11 +296,17 @@ public class NetworkedPlayer : NetworkBehaviour
     }
 
     [Command]
+    void CmdLockActivePlayer()
+    {
+        GameObject.FindObjectOfType<NetworkedBallGame>().LockActivePlayer();
+    }
+
+    [Command]
     void CmdUnlockActivePlayer()
     {
         GameObject.FindObjectOfType<NetworkedBallGame>().UnlockActivePlayer();
         //NetworkedBallGame.nBallGame.UnlockActivePlayer();
-        isActivePlayer = false;
+        //isActivePlayer = false;
     }
     
 
