@@ -23,9 +23,9 @@ public class NetworkedBallGame : NetworkBehaviour
 {
     public static NetworkedBallGame nBallGame;
 
-    readonly SyncListUInt BabyIDs = new SyncListUInt();
+    //readonly SyncListUInt BabyIDs = new SyncListUInt();
     //readonly SyncListGO Babies = new SyncListGO(); //List of all babies in scene
-    List<GameObject> Babies = new List<GameObject>();
+    //List<GameObject> Babies = new List<GameObject>();
 
     public GameObject menuBaby; //The baby instance used for the menu
     public GameObject BabyPrefab; //The balls that the player pulls KEEP As is; set in inspector
@@ -144,9 +144,9 @@ public class NetworkedBallGame : NetworkBehaviour
     //Balls that show the high score in the main menu
 
     //readonly SyncListUInt highScoreBallIDs = new SyncListUInt();
-    public List<GameObject> highScoreBalls = new List<GameObject>();
-    readonly SyncListFloat hsBallScales = new SyncListFloat();
-    readonly SyncListVector3 hsBallPositions = new SyncListVector3();
+   // public List<GameObject> highScoreBalls = new List<GameObject>();
+    //readonly SyncListFloat hsBallScales = new SyncListFloat();
+    //readonly SyncListVector3 hsBallPositions = new SyncListVector3();
     //readonly SyncListGO highScoreBalls = new SyncListGO();
 
 
@@ -178,7 +178,7 @@ public class NetworkedBallGame : NetworkBehaviour
 
     void Start()
     {
-        BabyIDs.Callback += OnBabyIDListUpdated;
+        //BabyIDs.Callback += OnBabyIDListUpdated;
         if (!isServer)
         {
             StartSetUp();
@@ -229,7 +229,7 @@ public class NetworkedBallGame : NetworkBehaviour
         MommaHitAudioList = new AudioClip[]{  (AudioClip)Resources.Load("Audio/hydra/ArmStroke1"),
                                           (AudioClip)Resources.Load("Audio/hydra/ArmStroke2"),
                                           (AudioClip)Resources.Load("Audio/hydra/ArmStroke3"),
-    };
+        };
 
 
 
@@ -336,21 +336,18 @@ public class NetworkedBallGame : NetworkBehaviour
         //Setup Highscore balls
         float rad = 0;
         Vector3 p = Vector3.zero;
-        /*for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
-            float rad = Random.Range(4, 10);
-            Vector3 p = Random.onUnitSphere * rad;
+            rad = Random.Range(4, 10);
+            p = Random.onUnitSphere * rad;
 
             GameObject nHSBall = (GameObject)Instantiate(HighScorePrefab, p, new Quaternion());
             nHSBall.transform.localScale = new Vector3(rad / 4, rad / 4, rad / 4);
+            SetHighScoreBallPitch(nHSBall, Random.Range(0, 1));
             NetworkServer.Spawn(nHSBall);
-            highScoreBalls.Add(nHSBall);
-            SetHighScoreBallPitch(nHSBall);
-            highScoreBallIDs.Add(nHSBall.GetComponent<NetworkIdentity>().netId);
         }
-        setHighScoreBalls(Game.current.highScore);*/
         //RpcSetHighScoreBalls(Game.current.highScore);
-        foreach(GameObject hsb in highScoreBalls)
+        /*foreach(GameObject hsb in highScoreBalls)
         {
             rad = Random.Range(4, 10);
             p = Random.onUnitSphere * rad;
@@ -360,8 +357,8 @@ public class NetworkedBallGame : NetworkBehaviour
             hsBallScales.Add(rad);
             hsBallPositions.Add(hsb.transform.localScale);
             SetHighScoreBallPitch(hsb, Random.Range(0, 1));
-        }
-        setHighScoreBalls(Game.current.highScore);
+        }*/
+        BlarpEventManager.SetHighScoreBalls(Game.current.highScore);
 
 
         //Momma already SetUp
@@ -414,17 +411,19 @@ public class NetworkedBallGame : NetworkBehaviour
         Title.GetComponent<MeshRenderer>().material.SetVector("_Scale", Title.transform.localScale);
 
         //Sync HSBalls
-        for(int i = 0; i < highScoreBalls.Count; i++)
+        /*for(int i = 0; i < highScoreBalls.Count; i++)
         {
             highScoreBalls[i].transform.position = hsBallPositions[i];
             highScoreBalls[i].transform.localScale = new Vector3(hsBallScales[i] / 4, hsBallScales[i] / 4, hsBallScales[i] / 4);
 
             SetHighScoreBallPitch(highScoreBalls[i], Random.Range(0, 1));
-        }
+        }*/
 
         //Room.GetComponent<RoomNetworked>().handL = activePlayer.GetComponent<NetworkedPlayer>().shield;
         //Room.GetComponent<RoomNetworked>().handR = activePlayer.GetComponent<NetworkedPlayer>().hand;
         //activePlayerHand = GameObject.Find("handR");
+        BlarpEventManager.EnableHighScoreBalls();
+        BlarpEventManager.SetHighScoreBalls(score);
 
         ChangeActivePlayer(activePlayerId);
 
@@ -434,7 +433,7 @@ public class NetworkedBallGame : NetworkBehaviour
 
 
     //CONVERTED
-    void setHighScoreBalls(float theScore)
+    /*void setHighScoreBalls(float theScore)
     {
 
         float base100 = Mathf.Floor(theScore / 100);
@@ -448,10 +447,10 @@ public class NetworkedBallGame : NetworkBehaviour
             hsb.GetComponent<MeshRenderer>().material.SetInt("_Digit2", (int)base10);
         }
 
-    }
+    }*/
 
     //CONVERTED
-    void removeHighScoreBalls()
+    /*void removeHighScoreBalls()
     {
         foreach (GameObject hsb in highScoreBalls)
         {
@@ -460,10 +459,10 @@ public class NetworkedBallGame : NetworkBehaviour
         }
 
 
-    }
+    }*/
 
     //CONVERTED
-    void addHighScoreBalls()
+    /*void addHighScoreBalls()
     {
         foreach (GameObject hsb in highScoreBalls)
         {
@@ -471,7 +470,7 @@ public class NetworkedBallGame : NetworkBehaviour
             hsb.GetComponent<Collider>().enabled = true;
         }
 
-    }
+    }*/
 
     //Tutorial methods currently disabled
     /*
@@ -697,7 +696,8 @@ public class NetworkedBallGame : NetworkBehaviour
 
         if(activePlayer != null)
         {
-            foreach (GameObject baby in Babies)
+            BlarpEventManager.UpdateBabyRenders(activePlayer, roomSize, MommaInfo);
+            /*foreach (GameObject baby in Babies)
             {
                 BabyUpdate(baby);
             }
@@ -705,7 +705,7 @@ public class NetworkedBallGame : NetworkBehaviour
             if (menuBaby.activeSelf)
             {
                 BabyUpdate(menuBaby);
-            }
+            }*/
         }
         //if( triggerDown == false ){
         
@@ -713,7 +713,7 @@ public class NetworkedBallGame : NetworkBehaviour
         //Hand.transform.localScale = new Vector3(
     }
 
-    private void BabyUpdate(GameObject baby)
+    /*private void BabyUpdate(GameObject baby)
     {
         //this requires access to the players hand position
         //v1 = baby.transform.position - activePlayer.GetComponent<NetworkedPlayer>().GetHand().transform.position;
@@ -758,7 +758,7 @@ public class NetworkedBallGame : NetworkBehaviour
         v = baby.transform.InverseTransformDirection(v);
         m = baby.GetComponent<MeshRenderer>().material;
         m.SetVector("_Velocity", v);
-    }
+    }*/
 
     //CONVERTED
     void FixedUpdate()
@@ -772,7 +772,7 @@ public class NetworkedBallGame : NetworkBehaviour
             }
             if(activePlayer != null)
             {
-                UpdateBabyForces(activePlayer);
+                BlarpEventManager.UpdateBabyPhysics(activePlayer, activePlayer.GetComponent<NetworkedPlayer>().GetHandTriggerVal(), activePlayer.GetComponent<NetworkedPlayer>().GetHandVelocity());
             }
         }
     }
@@ -800,11 +800,15 @@ public class NetworkedBallGame : NetworkBehaviour
                 {
                     activePlayer.GetComponent<NetworkedPlayer>().isActivePlayer = true;
                     aPlayerLocked = true;
-                    menuBaby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
-                    foreach (GameObject baby in Babies)
+                    if (!menuBaby.activeSelf)
+                    {
+                        menuBaby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
+                    }
+                    BlarpEventManager.ChangeBabySpringJoint(activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>());
+                    /*foreach (GameObject baby in Babies)
                     {
                         baby.GetComponent<SpringJoint>().connectedBody = activePlayer.GetComponent<NetworkedPlayer>().GetHand().GetComponent<Rigidbody>();
-                    }
+                    }*/
                 }
                 Debug.Log("Active Player changed to netID " + newID);
                 break;
@@ -843,7 +847,18 @@ public class NetworkedBallGame : NetworkBehaviour
         {
             return;
         }
-        // Make a new object
+        //Update Score and Move Momma Ball
+        score++;
+        Game.current.lastScore = score;
+        if (score > Game.current.highScore) { Game.current.highScore = score; }
+
+        ScoreText.GetComponent<TextMesh>().text = score.ToString();
+
+        resizeRoom();
+        RpcResizeRoom(false);
+        moveMomma();
+
+        // Make a new Baby Ball object
         GameObject go = (GameObject)Instantiate(BabyPrefab, new Vector3(), new Quaternion());
         go.transform.position = goHit.transform.position;
         //TODO: Create reference for active player rigidbody
@@ -855,23 +870,16 @@ public class NetworkedBallGame : NetworkBehaviour
         go.GetComponent<Rigidbody>().freezeRotation = true;
         go.transform.localScale = go.transform.localScale * (2.0f - (score / 30));
         go.GetComponent<MeshRenderer>().material.SetFloat("_Score", (float)score);
-
-        //audioSource.clip = AudioList[(int)score];
-
-        //    go.GetComponent<SpringJoint>().enabled = false; connectedBody = HandR.GetComponent<Rigidbody>();
+        
+        AudioSource aS = go.GetComponent<AudioSource>();
+        aS.clip = AudioList[(int)score % 4];
+        aS.pitch = .25f * Mathf.Pow(2, (int)(score / 4));
+        aS.volume = Mathf.Pow(.7f, (int)(score / 4));
+        aS.Play();
         NetworkServer.Spawn(go);
-        BabyIDs.Add(go.GetComponent<NetworkIdentity>().netId);
         go.GetComponent<Rigidbody>().isKinematic = false;
 
-        score++;
-        Game.current.lastScore = score;
-        if (score > Game.current.highScore) { Game.current.highScore = score; }
-
-        ScoreText.GetComponent<TextMesh>().text = score.ToString();
-
-        resizeRoom();
-        RpcResizeRoom(false);
-        moveMomma();
+        
 
         int aLIndex = Random.Range(0, MommaHitAudioList.Length);
         MommaHitSound.clip = MommaHitAudioList[aLIndex];
@@ -941,7 +949,7 @@ public class NetworkedBallGame : NetworkBehaviour
         while (true)
         {
             //print("unwaited");
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(1.0f);
             //print("WAITERD");
             makeMommaReal();
             //return false;
@@ -1025,26 +1033,27 @@ public class NetworkedBallGame : NetworkBehaviour
         if (isServer)
         {
             SaveLoad.Save();
-            RpcClearBabies();
-            foreach (GameObject baby in Babies)
+            //RpcClearBabies();
+
+            foreach (BabyNetworked baby in GameObject.FindObjectsOfType<BabyNetworked>())
             {
 
-
-                NetworkServer.Destroy(baby);
-
-
+                if (!baby.IsMenuBaby)
+                {
+                    NetworkServer.Destroy(baby.gameObject);
+                }
             }
-            BabyIDs.Clear();
-            Babies.Clear();
+            //BabyIDs.Clear();
+            //Babies.Clear();
             score = 0;
 
             blarpSound.Play();
             RpcPlayBlarpSound();
 
-            addHighScoreBalls();
-            RpcAddHighScoreBalls();
+            BlarpEventManager.EnableHighScoreBalls();
+            RpcEnalbeHighScoreBalls();
 
-            setHighScoreBalls(Game.current.highScore);
+            BlarpEventManager.SetHighScoreBalls(Game.current.highScore);
             RpcSetHighScoreBalls(Game.current.highScore);
 
             Title.GetComponent<MeshRenderer>().enabled = true;
@@ -1066,10 +1075,10 @@ public class NetworkedBallGame : NetworkBehaviour
             resizeRoomLarge();
             RpcResizeRoom(true);
 
-            menuBaby.SetActive(true);
-            RpcSetMenuBabyActive(true);
             menuBaby.transform.position = new Vector3(0, 1, 2);
             menuBaby.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+            menuBaby.SetActive(true);
+            RpcSetMenuBabyActive(true);
 
             isPlaying = false;
         }
@@ -1098,8 +1107,8 @@ public class NetworkedBallGame : NetworkBehaviour
         {
             restartSound.Play();
             RpcPlayRestartAudio();
-            removeHighScoreBalls();
-            RpcRemoveHighScoreBalls();
+            BlarpEventManager.DisableHighScoreBalls();
+            RpcDisableHighScoreBalls();
 
 
             resizeRoom();
@@ -1121,6 +1130,8 @@ public class NetworkedBallGame : NetworkBehaviour
 
             menuBaby.SetActive(false);
             RpcSetMenuBabyActive(false);
+            menuBaby.transform.position = new Vector3(0, 1, 2);
+            menuBaby.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
 
             StartButton.GetComponent<MeshRenderer>().enabled = false;
             StartButton.GetComponent<BoxCollider>().enabled = false;
@@ -1171,7 +1182,7 @@ public class NetworkedBallGame : NetworkBehaviour
     /// Updates baby to move towards controller when trigger is down.
     /// </summary>
     /// <param name="go"></param>
-    void UpdateBabyForces(GameObject go)
+    /*void UpdateBabyForces(GameObject go)
     {
         //Move this to update method on the player/hand script, then send change to BallGame through Command
         //float triggerVal = Controller.GetComponent<controllerInfo>().triggerVal;
@@ -1200,15 +1211,7 @@ public class NetworkedBallGame : NetworkBehaviour
 
             SpringJoint sj = baby.GetComponent<SpringJoint>();
             sj.spring = 1 * triggerVal;
-
-            /*
-            float w = (1.0f / (1.0f + lV1)) * (1.0f / (1.0f + lV1));
-
-            float lineWidth = w * .15f;
-
-
-            Color c = new Color(w, w, w);
-            */
+            
         }
 
         if (menuBaby.activeSelf)
@@ -1231,42 +1234,10 @@ public class NetworkedBallGame : NetworkBehaviour
             sj.spring = 1 * triggerVal;
         }
 
-        //For tutorial use
-        //print( LearningBlarp);
-        /*if (LearningBlarp != null)
-        {
-            //print("YYUP");
-
-            v1 = LearningBlarp.transform.position - go.transform.position;
-            float lV1 = v1.magnitude;
-            v1.Normalize();
-
-
-            Vector3 v = Controller.GetComponent<controllerInfo>().velocity;
-            float lVel = v.magnitude;
-            float dot = Vector3.Dot(v, v1);
-
-            v1 = -.5f * triggerVal * v1 * lVel * (-dot + 1);
-            LearningBlarp.GetComponent<Rigidbody>().AddForce(v1);
-
-            SpringJoint sj = LearningBlarp.GetComponent<SpringJoint>();
-            sj.spring = 1 * triggerVal;
-
-
-            float w = (1.0f / (1.0f + lV1)) * (1.0f / (1.0f + lV1));
-
-            float lineWidth = w * .15f;
-
-
-            Color c = new Color(w, w, w);
-
-
-        }*/
-
-    }
+    }*/
 
     //-------Delegates and Callbacks-----------
-    void OnBabyIDListUpdated(SyncListUInt.Operation op, int index, uint oldId, uint newId)
+    /*void OnBabyIDListUpdated(SyncListUInt.Operation op, int index, uint oldId, uint newId)
     {
         switch (op)
         {
@@ -1284,7 +1255,7 @@ public class NetworkedBallGame : NetworkBehaviour
             default:
                 break;
         }
-    }
+    }*/
 
     private void PlayNewBabyAudio(GameObject newBaby)
     {
@@ -1344,19 +1315,19 @@ public class NetworkedBallGame : NetworkBehaviour
     [ClientRpc]
     void RpcSetHighScoreBalls(float newScore)
     {
-        setHighScoreBalls(newScore);
+        BlarpEventManager.SetHighScoreBalls(newScore);
     }
 
     [ClientRpc]
-    void RpcRemoveHighScoreBalls()
+    void RpcDisableHighScoreBalls()
     {
-        removeHighScoreBalls();
+        BlarpEventManager.DisableHighScoreBalls();
     }
 
     [ClientRpc]
-    void RpcAddHighScoreBalls()
+    void RpcEnalbeHighScoreBalls()
     {
-        addHighScoreBalls();
+        BlarpEventManager.EnableHighScoreBalls();
     }
 
     [ClientRpc]
@@ -1390,11 +1361,11 @@ public class NetworkedBallGame : NetworkBehaviour
         blarpSound.Play();
     }
 
-    [ClientRpc]
+    /*[ClientRpc]
     void RpcClearBabies()
     {
         Babies.Clear();
-    }
+    }*/
 
     [ClientRpc]
     void RpcResizeRoom(bool resizeLarge)
