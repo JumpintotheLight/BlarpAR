@@ -115,8 +115,8 @@ public class RoomNetworked : NetworkBehaviour
 
         roomAudio = transform.gameObject.GetComponent<RoomAudio>();
 
-        createBuffers();
-        createMaterial();
+        CreateBuffers();
+        CreateMaterial();
 
         _kernel = computeShader.FindKernel("CSMain");
 
@@ -131,7 +131,7 @@ public class RoomNetworked : NetworkBehaviour
 
 
     //For some reason I made this method to create a material from the attached shader.
-    private void createMaterial()
+    private void CreateMaterial()
     {
 
         material = new Material(shader);
@@ -192,14 +192,14 @@ public class RoomNetworked : NetworkBehaviour
 
     }
 
-    private void createBuffers()
+    private void CreateBuffers()
     {
 
         _vertBuffer = new ComputeBuffer(maxVertCount, VERT_SIZE * sizeof(float));
         _ogBuffer = new ComputeBuffer(maxVertCount, 3 * sizeof(float));
         _transBuffer = new ComputeBuffer(32, sizeof(float));
         _collisionBuffer = new ComputeBuffer(numCollisions, COLLISION_SIZE * sizeof(float));
-        setCollisionDebugValues();
+        SetCollisionDebugValues();
 
         float[] inValues = new float[VERT_SIZE * maxVertCount];
         float[] ogValues = new float[3 * maxVertCount];
@@ -328,7 +328,7 @@ public class RoomNetworked : NetworkBehaviour
 
     }
 
-    private void setTransValues()
+    private void SetTransValues()
     {
         Matrix4x4 m = transform.localToWorldMatrix;
 
@@ -353,7 +353,7 @@ public class RoomNetworked : NetworkBehaviour
     }
 
     //CONVERTED
-    public void setCollisionValues()
+    public void SetCollisionValues()
     {
 
         for (int i = 0; i < numCollisions; i++)
@@ -387,7 +387,7 @@ public class RoomNetworked : NetworkBehaviour
     }
 
     //CONVERTED
-    public void setCollisionDebugValues()
+    public void SetCollisionDebugValues()
     {
 
         for (int i = 0; i < numCollisions; i++)
@@ -419,8 +419,8 @@ public class RoomNetworked : NetworkBehaviour
     private void Dispatch()
     {
 
-        setTransValues();
-        setCollisionValues();
+        SetTransValues();
+        SetCollisionValues();
 
         computeShader.SetVector("_HandL", handL != null ? handL.transform.position : Vector3.zero);
         computeShader.SetVector("_HandR", handR != null ? handR.transform.position : Vector3.zero);

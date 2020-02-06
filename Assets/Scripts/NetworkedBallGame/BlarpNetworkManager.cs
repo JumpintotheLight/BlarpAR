@@ -9,6 +9,7 @@ public class BlarpNetworkManager : NetworkManager
 
     public Transform playerSpawn;
     public GameObject gameDriverPrefab;
+    private bool acceptNewConnections = true;
 
     public override void OnStartServer()
     {
@@ -22,6 +23,11 @@ public class BlarpNetworkManager : NetworkManager
 
     public override void OnClientConnect(NetworkConnection conn)
     {
+        if (!acceptNewConnections)
+        {
+            conn.Disconnect();
+            return;
+        }
         base.OnClientConnect(conn);
 
 
@@ -67,6 +73,13 @@ public class BlarpNetworkManager : NetworkManager
         GameObject.Destroy(GameObject.FindObjectOfType<NetworkedBallGame>().gameObject);
         //GameObject.Destroy(NetworkedBallGame.nBallGame.gameObject);
     }
+
+    public bool AccepNewConnections
+    {
+        get { return acceptNewConnections; }
+        set { acceptNewConnections = value; }
+    }
+
 }
 
 public class CreateVrBlarpPlayerMessage : MessageBase

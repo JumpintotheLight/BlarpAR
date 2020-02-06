@@ -11,8 +11,7 @@ public class StartButtonNetworked : MonoBehaviour
         print(c.gameObject.tag);
         if (!c.gameObject.name.Contains("hand") && !c.gameObject.name.Contains("Shield"))
         {
-            GameObject.FindObjectOfType<NetworkedBallGame>().startGame(transform.gameObject);
-            //NetworkedBallGame.nBallGame.startGame(transform.gameObject);
+            GameObject.FindObjectOfType<NetworkedBallGame>().StartGame(transform.gameObject);
         }
 
     }
