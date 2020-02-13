@@ -70,7 +70,7 @@ public class NetworkedPlayer : NetworkBehaviour
 
             shield.transform.position = this.transform.position + new Vector3(0, 0, 0.394f);
         }
-        
+
 
         if (isServer)
         {
@@ -79,7 +79,7 @@ public class NetworkedPlayer : NetworkBehaviour
             nbg.GetComponent<NetworkedBallGame>().StartSetUp();
         }
 
-        
+
     }
 
     void TryDetectControllers()
@@ -105,7 +105,7 @@ public class NetworkedPlayer : NetworkBehaviour
 
     void Update()
     {
-        if(isLocalPlayer && !isVRPlayer)
+        if (isLocalPlayer && !isVRPlayer)
         {
             var x = Input.GetAxis("Horizontal") * Time.deltaTime * 3.0f;
             var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
@@ -124,7 +124,7 @@ public class NetworkedPlayer : NetworkBehaviour
         {
             QueryControllers();
             handVelocity = hand.GetComponent<Rigidbody>().velocity;
-            
+
             CmdUpdateShield(shieldTriggerVal);
 
             if (hasHandTriggerBeenPressed)
@@ -143,7 +143,7 @@ public class NetworkedPlayer : NetworkBehaviour
                 if (isActivePlayer)
                 {
                     CmdUnlockActivePlayer();
-                }   
+                }
             }
 
         }
@@ -155,7 +155,7 @@ public class NetworkedPlayer : NetworkBehaviour
         hasHandTriggerBeenReleased = false;
 
         if (isVRPlayer)
-        { 
+        {
             hTV = handDevice.GetState().rAxis1.x;
             shieldTriggerVal = shieldDevice.GetState().rAxis1.x;
         }
@@ -192,7 +192,7 @@ public class NetworkedPlayer : NetworkBehaviour
 
     public HandScriptNetworked GetHandScript()
     {
-       return hand.GetComponent<HandScriptNetworked>();
+        return hand.GetComponent<HandScriptNetworked>();
     }
 
     public GameObject GetHand()
@@ -235,6 +235,7 @@ public class NetworkedPlayer : NetworkBehaviour
     [Command]
     void CmdUpdateShield(float tV)
     {
+        //Debug.Log("S.Trigger = " + tV.ToString());
         shield.GetComponent<ShieldNetworked>().UpdateShield(tV);
         RpcUpdateShield(tV);
     }
@@ -242,10 +243,7 @@ public class NetworkedPlayer : NetworkBehaviour
     [ClientRpc]
     void RpcUpdateShield(float tV)
     {
-        if (!isServer)
-        {
-            shield.GetComponent<ShieldNetworked>().UpdateShield(tV);
-        }
+        shield.GetComponent<ShieldNetworked>().UpdateShield(tV);
     }
 
     [Command]
@@ -272,6 +270,6 @@ public class NetworkedPlayer : NetworkBehaviour
     {
         GameObject.FindObjectOfType<NetworkedBallGame>().UnlockActivePlayer();
     }
-    
+
 
 }

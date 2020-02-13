@@ -4,23 +4,8 @@ using UnityEngine;
 using Mirror;
 
 
-
-public enum GameState
-{
-    Initialize,
-    Menu,
-    Playing
-}
-
-class SyncListGO : SyncList<GameObject> { }
-class SyncListUInt : SyncList<uint> { }
-class SyncListVector3 : SyncList<Vector3> { }
-
 public class NetworkedBallGame : NetworkBehaviour
 {
-    public static NetworkedBallGame nBallGame;
-
-
     public GameObject menuBaby; //The baby instance used for the menu
     public GameObject babyPrefab; //The balls that the player pulls
     public GameObject highScorePrefab; //The balls spwaned around the menu that display the high score
@@ -61,9 +46,6 @@ public class NetworkedBallGame : NetworkBehaviour
     private AudioSource blarpSound;
     private SteamVR_PlayArea playArea; //VR play area
 
-    private Vector3 v1;
-    private Vector3 v2;
-
     [SyncVar(hook = nameof(SetRoomScale))]
     private Vector3 roomSize;
 
@@ -79,36 +61,10 @@ public class NetworkedBallGame : NetworkBehaviour
 
     private AudioSource mommaHitSound;
 
-    [SyncVar]
-    private bool syncedObejctsSpawned = false;
-
     private bool syncedObjectsSetUp = false;
 
     [SyncVar]
     private bool gameSetUp = false;
-
-    private bool triggerPulled;
-    private bool shieldTriggerPulled;
-    private float notDeadVal;
-    
-
-    //Set singleton
-    private void Awake()
-    {
-        if (nBallGame != null)
-        {
-            if (nBallGame != this)
-            {
-                Debug.Log("nBG Destroyed");
-                GameObject.Destroy(this.gameObject);
-                return;
-            }
-        }
-        nBallGame = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
-    }
-
-    
 
     void Start()
     {

@@ -15,9 +15,10 @@ public class ShieldNetworked : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        startScale = shieldObj.transform.localScale;
-        startPos = shieldObj.transform.localPosition;
-        mat = shieldObj.GetComponent<MeshRenderer>().material;
+       //startScale = shieldObj.transform.localScale;
+       //startPos = shieldObj.transform.localPosition;
+       mat = shieldObj.GetComponent<MeshRenderer>().material;
+       Debug.Log(string.Format("{0} : {1}", startScale, startPos));
     }
 
     // Update is called once per frame
@@ -34,7 +35,9 @@ public class ShieldNetworked : MonoBehaviour
 
             shieldObj.transform.localScale = triggerVal * startScale;
             //Debug.Log("Sheild Present?: " + (shieldObj != null).ToString());
-            mat.SetVector("_Size", shieldObj.transform.localScale);
+
+            //NOTE: Compute Shader code commented out for testing and Anrdoid builds
+            //mat.SetVector("_Size", shieldObj.transform.localScale);
         }
             
     }

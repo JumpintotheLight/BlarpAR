@@ -12,7 +12,6 @@ public class HandScriptNetworked : MonoBehaviour
         {
             Debug.Log("HandHit-Collison");
             transform.parent.gameObject.GetComponent<NetworkedPlayer>().HandHit(other.gameObject);
-            //NetworkedBallGame.nBallGame.HandHit(other.gameObject);
         }
         else if (other.gameObject.name.Contains("Momma"))
         {

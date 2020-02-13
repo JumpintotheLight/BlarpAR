@@ -16,9 +16,6 @@ public class BlarpNetworkManager : NetworkManager
         base.OnStartServer();
 
         NetworkServer.RegisterHandler<CreateVrBlarpPlayerMessage>(OnCreatePlayer);
-
-        //GameObject gDriver = (GameObject)Instantiate(spawnPrefabs.Find(prefab => prefab.name == gameDriverPrefab.name), Vector3.zero, Quaternion.identity);
-        //NetworkServer.Spawn(gDriver);
     }
 
     public override void OnClientConnect(NetworkConnection conn)
@@ -60,9 +57,6 @@ public class BlarpNetworkManager : NetworkManager
 
     public override void OnServerDisconnect(NetworkConnection conn)
     {
-        //TODO: call to PlayerDisconnected() on nBallGame
-
-        // call base functionality (actually destroys the player)
         base.OnServerDisconnect(conn);
     }
 

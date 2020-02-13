@@ -174,8 +174,8 @@ public class RoomNetworked : NetworkBehaviour
             material.SetInt("_QuadsPerRibbon", quadsPerRibbon);
 
             material.SetTexture("_NormalMap", normalMap);
-            material.SetTexture("_CubeMap", cubeMap);
-            material.SetMatrix("worldMat", transform.localToWorldMatrix);
+           material.SetTexture("_CubeMap", cubeMap);
+           material.SetMatrix("worldMat", transform.localToWorldMatrix);
 
 
             Graphics.DrawProcedural(MeshTopology.Triangles, numVertsTotal);
@@ -185,7 +185,7 @@ public class RoomNetworked : NetworkBehaviour
             particleMat.SetBuffer("buf_Points", _vertBuffer);
             particleMat.SetBuffer("og_Points", _ogBuffer);
 
-            //Graphics.DrawProcedural(MeshTopology.Triangles, maxVertCount * 3 );
+            Graphics.DrawProcedural(MeshTopology.Triangles, maxVertCount * 3 );
 
         }
 

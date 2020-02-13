@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
+
+class SyncListGO : SyncList<GameObject> { }
+
 public class TestDriver : NetworkBehaviour
 {
     public static TestDriver testDriver;
